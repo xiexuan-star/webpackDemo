@@ -1,0 +1,25 @@
+{
+  "name": "webpackdemo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiexuan-star/webpackDemo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xiexuan-star/webpackDemo/issues"
+  },
+  "homepage": "https://github.com/xiexuan-star/webpackDemo#readme",
+  "dependencies": {
+    "tapable": "^2.2.1"
+  }
+}

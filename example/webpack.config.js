@@ -1,4 +1,6 @@
-const path = require('path')
+const path = require('path');
+const PluginA = require('../plugins/plugin-a');
+const PluginB = require('../plugins/plugin-b');
 
 // 引入loader和plugin ...
 module.exports = {
@@ -15,7 +17,7 @@ module.exports = {
     path: path.resolve(__dirname, './build'),
     filename: '[name].js',
   },
-  plugins: [new PluginA(), new PluginB()],
+  plugins: [new PluginB(), new PluginA()],
   resolve: {
     extensions: ['.js', '.ts'],
   },
@@ -24,7 +26,6 @@ module.exports = {
       {
         test: /\.js/,
         use: [
-          // 使用自己loader有三种方式 这里仅仅是一种
           path.resolve(__dirname, '../loaders/loader-1.js'),
           path.resolve(__dirname, '../loaders/loader-2.js'),
         ],

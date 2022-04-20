@@ -1,12 +1,21 @@
+const Compiler = require('./compiler');
+
 function webpack(options) {
   // 合并参数
   const mergeOptions = _mergeOptions(options);
 
-  function compiler() {
-    //
-  }
+  // 创建compiler对象
+  const compiler = new Compiler(mergeOptions);
 
+  _loadPlugin(options.plugins, compiler);
   return { compiler };
+}
+
+function _loadPlugin(plugins, compiler) {
+  Array.isArray(plugins) && compiler.plugins.forEach(plugin => {
+    // plugin的本质其实时操作compiler对象进而影响编译结果
+    plugin.apply(compiler);
+  });
 }
 
 // 合并shell命令中的option，通过process.argv
