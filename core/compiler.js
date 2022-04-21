@@ -1,9 +1,12 @@
 const { SyncHook } = require('tapable');
+const parser = require('@babel/parser');
+const traverse = require('@babel/traverse').default;
+const generator = require('@babel/generator').default;
+const t = require('@babel/types');
 const { toUnixPath } = require('./utils');
 const path = require('path');
 const fs = require('fs');
 
-// compiler 是webpack的核心类
 class Compiler {
   /**
    * @param {Object} mergedOptions
@@ -74,8 +77,37 @@ class Compiler {
    * @returns {}
    */
   buildModule(moduleName, modulePath) {
+    // 1.读取源码
     const originSourceCode = this.moduleCode = this.originSourceCode = fs.readFileSync(modulePath, 'utf8');
+    // 2.调用loader
     this.handlerLoader(modulePath);
+    // 3.调用webpack进行模块编译,得到module对象
+    return this.handleWebpackModule(moduleName, modulePath);
+  }
+
+  /**
+   * @description 模块编译，得到模块对象
+   * @param moduleName
+   * @param modulePath
+   * @returns {{}}
+   */
+  handleWebpackModule(moduleName, modulePath) {
+    // 计算相对路径
+    const moduleId = './' + path.posix.relative(this.rootPath, modulePath);
+    // 创建模块对象
+    const module = {
+      id: moduleId,
+      dependencies: new Set(), // 模块依赖
+      name: [moduleName] // 模块入口文件
+    };
+    // 调用babel
+    const ast = parser.parse(this.moduleCode, { sourceType: 'module' });
+    traverse(ast, {
+      // 讲require中的依赖收集至dependencies中
+      CallExpression(nodePath) {
+        const node = nodePath.node;
+      }
+    });
     return {};
   }
 
