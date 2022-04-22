@@ -106,6 +106,21 @@ class Compiler {
       // 讲require中的依赖收集至dependencies中
       CallExpression(nodePath) {
         const node = nodePath.node;
+        // 获取所有require函数节点
+        if (node.callee.name === 'require') {
+          // 拿到require函数引用的相对路径
+          const requirePath = node.arguments[0].value;
+          // 寻找模块绝对路径 当前模块路径 + require相对路径
+          const moduleDirName = path.posix.dirname(modulePath);
+          const absolutePath = tryExtensions(
+            path.posix.join(moduleDirName, requirePath),
+            this.options.resolve.extensions,
+            requirePath,
+            moduleDirName
+          );
+          // 生成moduleId - 针对于根路径的模块ID 添加模块依赖路径
+
+        }
       }
     });
     return {};
