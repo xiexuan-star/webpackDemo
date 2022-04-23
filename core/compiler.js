@@ -3,7 +3,7 @@ const parser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
 const generator = require('@babel/generator').default;
 const t = require('@babel/types');
-const { toUnixPath } = require('./utils');
+const { toUnixPath, tryExtensions } = require('./utils');
 const path = require('path');
 const fs = require('fs');
 
@@ -57,6 +57,9 @@ class Compiler {
 
   run(callback) {
     this.hooks.run.call();
+    const entry = this.getEntry();
+    this.buildEntryModule(entry);
+    console.log(this.entries);
   }
 
   /**
@@ -74,7 +77,7 @@ class Compiler {
    * @description 模块编译函数
    * @param {string} moduleName
    * @param {string} modulePath
-   * @returns {}
+   * @returns Module
    */
   buildModule(moduleName, modulePath) {
     // 1.读取源码
@@ -89,21 +92,28 @@ class Compiler {
    * @description 模块编译，得到模块对象
    * @param moduleName
    * @param modulePath
-   * @returns {{}}
+   * @return Module
    */
   handleWebpackModule(moduleName, modulePath) {
     // 计算相对路径
     const moduleId = './' + path.posix.relative(this.rootPath, modulePath);
-    // 创建模块对象
+    /**
+     * @typedef Module
+     * @property {string} id 模块相对路径
+     * @property {string} _source 模块转译后的源码
+     * @property {Set<string>} dependencies 模块依赖
+     * @property {string[]} name 模块入口名称(也作为模块名称)
+     */
     const module = {
       id: moduleId,
+      _source: '',
       dependencies: new Set(), // 模块依赖
       name: [moduleName] // 模块入口文件
     };
     // 调用babel
     const ast = parser.parse(this.moduleCode, { sourceType: 'module' });
     traverse(ast, {
-      // 讲require中的依赖收集至dependencies中
+      // 将require中的依赖收集至dependencies中
       CallExpression(nodePath) {
         const node = nodePath.node;
         // 获取所有require函数节点
@@ -119,11 +129,20 @@ class Compiler {
             moduleDirName
           );
           // 生成moduleId - 针对于根路径的模块ID 添加模块依赖路径
-
+          // 上面的几次转换都是为了在这里获取依赖的相对路径
+          const moduleId = './' + path.posix.relative(this.rootPath, absolutePath);
+          // 借助babel的转换能力,将require变成__webpack__require__
+          node.callee = t.identifier('__webpack__require__');
+          // 将路径参数修改为相对根路径来处理
+          node.arguments = [t.stringLiteral(moduleId)];
+          // 添加至dependencies
+          module.dependencies.add(moduleId);
         }
       }
     });
-    return {};
+    const { code } = generator(ast);
+    module._source = code;
+    return module;
   }
 
   /**
@@ -134,7 +153,7 @@ class Compiler {
     const loaders = this.options.module.rules;
     const matchedRules = [];
     loaders.forEach(loader => {
-      if (loader.test.match(modulePath)) {
+      if (loader.test.test(modulePath)) {
         // 此处仅考虑use的情况，实际上还有直接传入loader的情况
         // if (loader.use) {
         matchedRules.push(...loader.use);
@@ -145,7 +164,7 @@ class Compiler {
     });
 
     // 倒序执行loader
-    for (let i = matchedRules.length - 1; i >= 0; i++) {
+    for (let i = matchedRules.length - 1; i >= 0; i--) {
       const loader = require(matchedRules[i]);
       this.moduleCode = loader(this.moduleCode);
     }
