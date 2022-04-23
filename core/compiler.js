@@ -60,6 +60,7 @@ class Compiler {
     const entry = this.getEntry();
     this.buildEntryModule(entry);
     console.log(this.entries);
+    this.close();
   }
 
   /**

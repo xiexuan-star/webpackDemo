@@ -12,7 +12,7 @@ function webpack(options) {
 }
 
 function _loadPlugin(plugins, compiler) {
-  Array.isArray(plugins) && compiler.plugins.forEach(plugin => {
+  Array.isArray(plugins) && compiler.options.plugins.forEach(plugin => {
     // plugin的本质其实时操作compiler对象进而影响编译结果
     plugin.apply(compiler);
   });
