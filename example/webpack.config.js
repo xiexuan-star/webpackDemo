@@ -14,7 +14,7 @@ module.exports = {
   // 换而言之entry和loader的所有相对路径都是相对于这个路径而言的
   context: process.cwd(),
   output: {
-    path: path.resolve(__dirname, './build'),
+    path: path.resolve(__dirname, './dist'),
     filename: '[name].js',
   },
   plugins: [new PluginB(), new PluginA()],
