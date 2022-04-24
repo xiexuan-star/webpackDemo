@@ -74,9 +74,6 @@ class Compiler {
     this.hooks.run.call();
     const entry = this.getEntry();
     this.buildEntryModule(entry);
-    console.log('entries=>', this.entries);
-    console.log('modules=>', this.modules);
-    console.log('chunks=>', this.chunks);
     // 导出文件
     this.exportFile(callback);
   }
@@ -226,7 +223,7 @@ class Compiler {
     // 根据chunks生成assets内容
     this.chunks.forEach(chunk => {
       const parseFileName = output.filename.replace('[name]', chunk.name);
-      this.assets[parseFileName] = this.getSourceCode(chunk);
+      this.assets.set(parseFileName, this.getSourceCode(chunk));
     });
     //  生成结束,调用emit钩子
     this.hooks.emit.call();
@@ -237,7 +234,7 @@ class Compiler {
     // files中存放所有的文件名
     this.files = Object.keys(this.assets);
     // 将assets中的内容生成最终的📦文件,写入文件系统
-    Object.entries(this.assets).forEach(([fileName, fileContent]) => {
+    this.assets.forEach((fileContent, fileName) => {
       const filePath = path.join(output.path, fileName);
       fs.writeFileSync(filePath, fileContent);
     });

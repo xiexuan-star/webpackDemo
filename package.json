@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "directories": {
-    "example": "example"
+    "example": "implement"
   },
   "scripts": {
-    "test": "node core/index.js && node example/dist/main.js && node example/dist/second.js"
+    "test-example": "node implement/core/index.js && node implement/dist/main.js && node implement/dist/second.js",
+    "test": "npx webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,14 @@
     "@babel/parser": "^7.17.9",
     "@babel/traverse": "^7.17.9",
     "@babel/types": "^7.17.0",
-    "tapable": "^2.2.1"
+    "jszip": "^3.9.1",
+    "lodash": "^4.17.21",
+    "tapable": "^2.2.1",
+    "webpack": "^5.72.0",
+    "webpack-sources": "^3.2.3"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^5.5.0",
+    "webpack-cli": "^4.9.2"
   }
 }
