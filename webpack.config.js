@@ -14,7 +14,6 @@ module.exports = {
     filename: '[name].js',
   },
   plugins: [
-    new HtmlWebpackPlugin(),
     new CompressAssetsPlugin({
       output: 'bundler.zip'
     }),
@@ -23,6 +22,7 @@ module.exports = {
         src: 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js',
         variableName: '_'
       }
-    })
+    }),
+    new HtmlWebpackPlugin()
   ],
 };
